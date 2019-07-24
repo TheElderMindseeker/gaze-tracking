@@ -7,7 +7,7 @@ from base64 import b64decode
 
 import cv2
 import numpy as np
-from flask import Flask, jsonify, request, url_for
+from flask import Flask, jsonify, request, url_for, render_template, Blueprint
 
 from model import GazeTrackingModel
 
@@ -16,7 +16,9 @@ N_TRAINING_SAMPLES = os.environ.get('GAZE_N_SAMPLES', 15)
 PAGES = ('image1.jpg', 'image2.jpg', 'image3.jpg')
 
 
-app = Flask(__name__)  # pylint: disable=invalid-name
+app = Flask(__name__, static_folder='public')  # pylint: disable=invalid-name
+static_blueprint = Blueprint('extra_static', __name__, static_folder='public/static', static_url_path='/static')
+app.register_blueprint(static_blueprint)
 models = dict()  # pylint: disable=invalid-name
 frames = dict()  # pylint: disable=invalid-name
 
@@ -24,10 +26,6 @@ frames = dict()  # pylint: disable=invalid-name
 def data_uri_to_cv2_img(uri):
     encoded_data = uri.split(',')[1]
     decoded_data = b64decode(encoded_data)
-
-    with open(f'images/{uuid4()}.jpg', 'wb') as output_file:
-        output_file.write(decoded_data)
-
     nparr = np.fromstring(decoded_data, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # pylint: disable=no-member
     print(type(img))
@@ -37,7 +35,7 @@ def data_uri_to_cv2_img(uri):
 @app.route('/')
 def index():
     """Index page"""
-    return 'Hello, frontend'
+    return app.send_static_file('index.html')
 
 
 @app.route('/new', methods=['GET'])
