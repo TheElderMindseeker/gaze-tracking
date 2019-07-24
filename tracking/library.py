@@ -90,11 +90,7 @@ def get_info(frame, parameters):
         corner_r = right_corner
     except:
         pass
-    #TODO
-    r_x = None
-    r_y = None
-    l_x = None
-    l_y = None
+
     try:
         gaze_point = track_gaze(iris_r, iris_l, corner_r, corner_l, r_x, r_y, l_x, l_y)
     except:

@@ -107,12 +107,20 @@ def analyze():
     coord_x = frame_info.get('Gaze_x', 0)
     coord_y = frame_info.get('Gaze_y', 0)
 
-    print(coord_x, ' ', coord_y)
+    if 'real_x' in request.json and 'real_y' in request.json:
+        real_x = request.json['real_x']
+        real_y = request.json['real_y']
+        real_point = np.array((real_x, real_y), dtype=np.float)
+        calc_point = np.array((coord_x, coord_y), dtype=np.float)
+        distance = np.linalg.norm(real_point - calc_point)
+    else:
+        distance = None
 
     if coord_x >= 900 and coord_y >= 525:
-        page_index = min(page_index + 1, len(PAGES))
+        page_index = min(page_index + 1, len(PAGES) - 1)
 
     return jsonify(coord_x=coord_x,
                    coord_y=coord_y,
+                   distance=distance,
                    image_url=url_for('static', filename=PAGES[page_index]),
                    index=page_index)
